@@ -25,6 +25,7 @@ public class ServerExample {
                 ObjectInputStream input = new ObjectInputStream(new ByteArrayInputStream(request));
                 String data = (String) input.readObject();
                 input.close();
+//                System.out.println("sha of " + data + " requested");
                 HashCode hashCode = Hashing.sha512().hashString(data, Charset.defaultCharset());
                 return hashCode.asBytes();
             }

@@ -24,7 +24,7 @@ public class ClientExample {
         Random random = new Random(12345);
 
         MMapClient mMapClient = new MMapClient(file, 8000, 1000, 5000);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10000; i++) {
             String randS = String.valueOf(random.nextInt());
             String data = "data" + randS;
 
@@ -39,10 +39,9 @@ public class ClientExample {
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-            System.out.println(i + " success");
-            LockSupport.parkNanos(10);
+//            System.out.println(i + " success");
+            LockSupport.parkNanos(1);
         }
-
     }
 
 }
