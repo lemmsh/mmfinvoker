@@ -11,4 +11,5 @@ repositories {
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.12'
     testCompile 'junit:junit:4.12'
+    testCompile 'com.google.guava:guava:18.0'
 }
