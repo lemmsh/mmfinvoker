@@ -47,10 +47,10 @@ public class MMapServer {
                         doStart();
                     } catch (Exception e) {
                         exceptionHandler.handle(e);
-                        mem.put(new byte[bufferSize]);
                         mem.position(0);
-                        mem.force();
-                        //exception handling
+                        mem.put(new byte[5]);
+                        mem.put(0, Protocol.SERVER_ERR);
+                        mem.position(0);
                     }
                 }
             }
@@ -74,10 +74,10 @@ public class MMapServer {
                 if (response.length > bufferSize) {
                     throw new IllegalStateException("response is too large: " + response.length);
                 }
-                mem.position(0);
-                mem.put(Protocol.RESPONSE_START);
+                mem.position(1);
                 mem.putInt(response.length);
                 mem.put(response);
+                mem.put(0, Protocol.RESPONSE_START);
                 mem.position(0);
             } else {
                 LockSupport.parkNanos(1000);

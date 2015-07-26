@@ -24,18 +24,22 @@ public class ClientExample {
         Random random = new Random(12345);
 
         MMapClient mMapClient = new MMapClient(file, 8000, 1000, 5000);
-        for (int i = 0; i < 100000; i++) {
-            String randS = random.ints().limit(10).toString();
+        for (int i = 0; i < 100; i++) {
+            String randS = String.valueOf(random.nextInt());
             String data = "data" + randS;
 
             ByteArrayOutputStream array = new ByteArrayOutputStream();
             ObjectOutputStream output = new ObjectOutputStream(array);
             output.writeObject(data);
             output.close();
-            byte[] response = mMapClient.ask(array.toByteArray());
-
-            HashCode controlData = Hashing.sha512().hashString(data, Charset.defaultCharset());
-            Assert.assertArrayEquals(controlData.asBytes(), response);
+            try{
+                byte[] response = mMapClient.ask(array.toByteArray());
+                HashCode controlData = Hashing.sha512().hashString(data, Charset.defaultCharset());
+                Assert.assertArrayEquals(controlData.asBytes(), response);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+            System.out.println(i + " success");
             LockSupport.parkNanos(10);
         }
 

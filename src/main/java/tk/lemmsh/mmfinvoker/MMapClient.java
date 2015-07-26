@@ -9,6 +9,7 @@ import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.LockSupport;
@@ -42,16 +43,21 @@ public class MMapClient {
             if (request.length > bufferSize) {
                 throw new IllegalArgumentException("request length if greater than buffer: " + request.length);
             }
-
-            mem.put(Protocol.REQUEST_START);
+            mem.put(new byte[]{0, 0, 0, 0, 0});
+            mem.position(1);
             mem.putInt(request.length);
             mem.put(request);
+            mem.put(0, Protocol.REQUEST_START);
             mem.position(0);
 
             long started = System.currentTimeMillis();
 
             while (true) {
-                if (mem.hasRemaining() && mem.get(0) == Protocol.RESPONSE_START) {
+                if (mem.hasRemaining() && mem.get(0) == Protocol.RESPONSE_START || mem.get(0) == Protocol.SERVER_ERR) {
+                    if (mem.get(0) == Protocol.SERVER_ERR) {
+                        mem.put(0, (byte)0);
+                        throw new RuntimeException("server returned error");
+                    }
                     break;
                 } else {
                     LockSupport.parkNanos(granularity);
@@ -64,6 +70,8 @@ public class MMapClient {
             int length = mem.getInt();
             byte[] response = new byte[length];
             mem.get(response);
+            mem.position(0);
+            mem.put(new byte[5]);
             mem.position(0);
             return response;
         } finally {
