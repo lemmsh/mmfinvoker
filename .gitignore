@@ -1,0 +1,6 @@
+*.shm
+build
+gradle
+.idea
+.gradle
+*.iml
