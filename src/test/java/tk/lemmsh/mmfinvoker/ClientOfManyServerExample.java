@@ -30,22 +30,19 @@ public class ClientOfManyServerExample {
         for (final MMapClient client : clients) {
             i ++;
             final byte j = (byte)i;
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        long start = System.currentTimeMillis();
-                        for (int k = 0; k < 1000; k++) {
-                            byte[] ask = client.ask(new byte[]{1, 2, 3, j});
-                            if (ask.length > 4)
-                                throw new IllegalStateException("adsf");
-                            LockSupport.parkNanos(1000);
-                        }
-                        long stop = System.currentTimeMillis();
-                        System.out.println(j + " took " + (stop - start)/1000);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            executorService.execute(() -> {
+                try{
+                    long start = System.currentTimeMillis();
+                    for (int k = 0; k < 1000; k++) {
+                        byte[] ask = client.ask(new byte[]{1, 2, 3, j});
+                        if (ask.length > 4)
+                            throw new IllegalStateException("adsf");
+                        LockSupport.parkNanos(1000);
                     }
+                    long stop = System.currentTimeMillis();
+                    System.out.println(j + " took " + (stop - start)/1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }

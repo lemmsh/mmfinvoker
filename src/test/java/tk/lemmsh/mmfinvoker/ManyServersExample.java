@@ -21,19 +21,11 @@ public class ManyServersExample {
             final int finalI = i;
             MMapServer mMapServer = new MMapServer(
                     new File("shared" + i + ".shm"),
-                    8000, 1000, new MMapServerLogic() {
-                @Override
-                public byte[] apply(byte[] request) throws Exception {
-                    System.out.println("req " + finalI);
-                    map.addAndGet(finalI, 1);
-                    return request;
-                }
-            }, new ExceptionHandler() {
-                @Override
-                public void handle(Exception e) {
-                    e.printStackTrace();
-                }
-            });
+                    8000, 1000, request -> {
+                        System.out.println("req " + finalI);
+                        map.addAndGet(finalI, 1);
+                        return request;
+                    }, Throwable::printStackTrace);
             mMapServer.start();
             serverList.add(mMapServer);
         }

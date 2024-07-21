@@ -2,7 +2,7 @@ package tk.lemmsh.mmfinvoker;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.*;
 import java.nio.MappedByteBuffer;
@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.LockSupport;
+
 
 /**
  * Created by lemmsh on 7/26/15.
@@ -35,7 +36,7 @@ public class ClientExample {
             try{
                 byte[] response = mMapClient.ask(array.toByteArray());
                 HashCode controlData = Hashing.sha512().hashString(data, Charset.defaultCharset());
-                Assert.assertArrayEquals(controlData.asBytes(), response);
+                assertArrayEquals(controlData.asBytes(), response);
             } catch (Throwable e) {
                 e.printStackTrace();
             }

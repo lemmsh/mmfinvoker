@@ -39,19 +39,16 @@ public class MMapServer {
         mem.put(new byte[bufferSize]);
         mem.position(0);
         mem.force();
-        run = executor.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                while(true) {
-                    try {
-                        doStart();
-                    } catch (Exception e) {
-                        exceptionHandler.handle(e);
-                        mem.position(0);
-                        mem.put(new byte[5]);
-                        mem.put(0, Protocol.SERVER_ERR);
-                        mem.position(0);
-                    }
+        run = executor.submit(() -> {
+            while(true) {
+                try {
+                    doStart();
+                } catch (Exception e) {
+                    exceptionHandler.handle(e);
+                    mem.position(0);
+                    mem.put(new byte[5]);
+                    mem.put(0, Protocol.SERVER_ERR);
+                    mem.position(0);
                 }
             }
         });
@@ -66,6 +63,7 @@ public class MMapServer {
     private void doStart() throws Exception {
         while (true) {
             if (mem.hasRemaining() && mem.get(0) == Protocol.REQUEST_START) {
+                mem.put(0, Protocol.SERVER_BUSY);
                 mem.position(1);
                 int length = mem.getInt();
                 byte[] request = new byte[length];

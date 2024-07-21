@@ -43,14 +43,19 @@ public class MMapClient {
             if (request.length > bufferSize) {
                 throw new IllegalArgumentException("request length if greater than buffer: " + request.length);
             }
+
+            long started = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+            while (mem.hasRemaining() && mem.get(0) == Protocol.SERVER_BUSY) {
+                LockSupport.parkNanos(granularity);
+                if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) - started > timeout)
+                    throw new TimeoutException("got timeout on request - the server is busy");
+            }
             mem.put(new byte[]{0, 0, 0, 0, 0});
             mem.position(1);
             mem.putInt(request.length);
             mem.put(request);
             mem.put(0, Protocol.REQUEST_START);
             mem.position(0);
-
-            long started = System.currentTimeMillis();
 
             while (true) {
                 if (mem.hasRemaining() && mem.get(0) == Protocol.RESPONSE_START || mem.get(0) == Protocol.SERVER_ERR) {
@@ -61,7 +66,7 @@ public class MMapClient {
                     break;
                 } else {
                     LockSupport.parkNanos(granularity);
-                    if (System.currentTimeMillis() - started > timeout)
+                    if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) - started > timeout)
                         throw new TimeoutException("got timeout on request");
                 }
             }

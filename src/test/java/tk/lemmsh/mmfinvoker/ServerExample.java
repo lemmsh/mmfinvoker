@@ -19,22 +19,14 @@ public class ServerExample {
     public static void main(String[] args) throws IOException {
 
         File file = new File("shared.shm");
-        MMapServer mMapServer = new MMapServer(file, 8000, 1000, new MMapServerLogic() {
-            @Override
-            public byte[] apply(byte[] request) throws Exception {
-                ObjectInputStream input = new ObjectInputStream(new ByteArrayInputStream(request));
-                String data = (String) input.readObject();
-                input.close();
+        MMapServer mMapServer = new MMapServer(file, 8000, 1000, request -> {
+            ObjectInputStream input = new ObjectInputStream(new ByteArrayInputStream(request));
+            String data = (String) input.readObject();
+            input.close();
 //                System.out.println("sha of " + data + " requested");
-                HashCode hashCode = Hashing.sha512().hashString(data, Charset.defaultCharset());
-                return hashCode.asBytes();
-            }
-        }, new ExceptionHandler() {
-            @Override
-            public void handle(Exception e) {
-                e.printStackTrace();
-            }
-        });
+            HashCode hashCode = Hashing.sha512().hashString(data, Charset.defaultCharset());
+            return hashCode.asBytes();
+        }, Throwable::printStackTrace);
         mMapServer.start();
 
     }

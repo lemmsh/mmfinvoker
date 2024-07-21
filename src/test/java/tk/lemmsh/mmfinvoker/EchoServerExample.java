@@ -16,17 +16,7 @@ public class EchoServerExample {
 
     public static void main(String[] args) throws IOException {
         File file = new File("shared-echo.shm");
-        MMapServer mMapServer = new MMapServer(file, 8000010, 1000, new MMapServerLogic() {
-            @Override
-            public byte[] apply(byte[] request) throws Exception {
-                return request;
-            }
-        }, new ExceptionHandler() {
-            @Override
-            public void handle(Exception e) {
-                e.printStackTrace();
-            }
-        });
+        MMapServer mMapServer = new MMapServer(file, 8000010, 1000, request -> request, Throwable::printStackTrace);
         mMapServer.start();
     }
 
